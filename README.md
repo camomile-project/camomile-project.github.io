@@ -30,7 +30,7 @@ Once you are happy with what you are seeing at http://localhost:4567, you can de
 ```shell
 bundle exec middleman build
 export COMMIT_MESSAGE=""
-ghp-import -n -p -m $COMMIT_MESSAGE -b master
+ghp-import -n -p -m $COMMIT_MESSAGE -b master build
 ```
 
 This will automagically commit and push the content of the `build` directory to the repository `master` branch (which is served at `camomile-project.github.io`)
