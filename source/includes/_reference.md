@@ -36,12 +36,12 @@ client.setCorpusPermissions(id_corpus, client.READ, group=id_group)
 ```
 
 ```javascript
-Camomile.setCorpusPermissionsForUser(
-  id_corpus, id_user, Camomile.ADMIN, callback);
-Camomile.setCorpusPermissionsForUser(
-  id_corpus, id_user, Camomile.WRITE, callback);
-Camomile.setCorpusPermissionsForGroup(
-  id_corpus, id_group, Camomile.READ, callback);
+client.setCorpusPermissionsForUser(
+  id_corpus, id_user, Camomile.ADMIN);
+client.setCorpusPermissionsForUser(
+  id_corpus, id_user, Camomile.WRITE);
+client.setCorpusPermissionsForGroup(
+  id_corpus, id_group, Camomile.READ);
 ```
 
 The Camomile platform handles permissions: users may access only the resources for which they have enough permission.
@@ -116,12 +116,7 @@ assert corpora[0]._id == id_corpora[0]
 ```
 
 ```javascript
-client.getCorpora(
-  function(id_corpora) {
-    do_something_with(id_corpora);
-  },
-  {returns_id: True}
-);
+client.getCorpora({returns_id: True}).then(id_corpora => { });
 ```
 
 Each resource is given a unique identifier (`_id`) by MongoDB upon creation.
@@ -144,12 +139,7 @@ assert corpora[0].name == 'my corpus'
 ```
 
 ```javascript
-client.getCorpora(
-  function(corpora) {
-
-  },
-  {filter: {name: 'my corpus'}}
-);
+client.getCorpora({filter: {name: 'my corpus'}}).then(corpora => { });
 ```
 
 Most `get{Resource}` methods (e.g. `getCorpora`, `getLayers`, ...) support filtering by resource attribute. 
@@ -171,13 +161,7 @@ do_something_with(corpus.history)
 ```
 
 ```javascript
-client.getCorpus(
-  id_corpus, 
-  function (corpus) { 
-    do_something_with(corpus.history); 
-  },
-  {history: True}
-);
+client.getCorpus(id_corpus, {history: True}).then(corpus => { });
 ```
 
 The API keeps track of all changes made to corpora, media, layers and annotations, in a dedicated `history` attribute. 
@@ -224,7 +208,7 @@ client.login(username, password)
 
 ```javascript
 var server = 'http://example.com';
-Camomile.setURL(server);
+var client = new Camomile(server);
 ```
 
 > JSON response upon success
@@ -288,7 +272,7 @@ client.update_password('new_password')
 ```
 
 ```javascript
-client.update_password("new_password", callback);
+client.update_password("new_password").then(() => { });
 ```
 
 ```http
@@ -342,9 +326,7 @@ user = client.createUser('username', 'password', role='user',
 ```
 
 ```javascript
-client.createUser('username', 'password', 
-                  {'affiliation': 'LIMSI/CNRS', 'status': 'PhD student'}
-                  'user', callback);
+client.createUser('username', 'password', {'affiliation': 'LIMSI/CNRS', 'status': 'PhD student'}, 'user').then(() => {});
 ```
 
 
@@ -2380,9 +2362,7 @@ GET /corpus/555daefff80f910100d741d6/metadata/my.picture?file HTTP/1.1
 ```
 
 ```javascript
-Camomile.getCorpusMetadata('555daefff80f910100d741d6', 'test2.child', function(err, datas) {
-    console.log(datas);
-});
+client.getCorpusMetadata('555daefff80f910100d741d6', 'test2.child').then(data => console.log(data));
 ```
 
 
@@ -2430,13 +2410,9 @@ client.getCorpusMetadataKeys(
 ```
 
 ```javascript
-Camomile.getCorpusMetadataKeys('555daefff80f910100d741d6', function(err, datas) {
-    console.log(datas);
-});
+client.getCorpusMetadataKeys('555daefff80f910100d741d6').then(data => console.log(data));
 
-Camomile.getCorpusMetadataKeys('555daefff80f910100d741d6', 'level1', function(err, datas) {
-    console.log(datas);
-});
+client.getCorpusMetadataKeys('555daefff80f910100d741d6', 'level1').then(data => console.log(data));
 ```
 
 ```http
@@ -2488,13 +2464,10 @@ POST /corpus/555daefff80f910100d741d6/metadata/ HTTP/1.1
 ```
 
 ```javascript
-Camomile.setCorpusMetadata(
+client.setCorpusMetadata(
     '555daefff80f910100d741d6', 
-    {'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}} , 
-    function(err, success) {
-        console.log(success);
-    }
-);
+    {'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}} 
+).then(success => console.log(success));
 ```
 
 > Sample JSON response
@@ -2538,14 +2511,11 @@ client.sendCorpusMetadataFile(
 var inputFile = document.getElementById('file');
 var file = inputFile.files[0];
 
-Camomile.sendCorpusMetadataFile(
+client.sendCorpusMetadataFile(
     '555daefff80f910100d741d6', 
     'level1.mypicture', 
-    file, 
-    function(err, success) {
-        console.log(success);
-    }
-);
+    file
+).then(success => console.log(success));
 ```
 
 
@@ -2589,9 +2559,7 @@ DELETE /corpus/555daefff80f910100d741d6/metadata/level1 HTTP/1.1
 ```
 
 ```javascript
-Camomile.deleteCorpusMetadata('555daefff80f910100d741d6', 'level1', function(err, success) {
-    console.log(success);
-});
+client.deleteCorpusMetadata('555daefff80f910100d741d6', 'level1').then(success => console.log(success));;
 ```
 
 > Sample JSON response
@@ -2668,12 +2636,14 @@ client.watchCorpus('555daefff80f910100d741d6', callback)
 ```
 
 ```javascript
-Camomile.listen(function(error, channel_id, event) {
-    var unwatchCorpus = event.watchCorpus('555daefff80f910100d741d6', function(error, data) {
-        console.log(data);
-        
-        // For unwatch corpus:
-        unwatchCorpus();
+client.listen();
+  .then(sseChannel => {
+    sseChannel.watchCorpus('555daefff80f910100d741d6', function(error, data) {
+      console.log(error, data);
+    }).then(cancelWatcher => {
+      // To unwatch the corpus :
+
+      //cancelWatcher();
     });
 });
 ```
