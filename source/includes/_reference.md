@@ -2636,16 +2636,11 @@ client.watchCorpus('555daefff80f910100d741d6', callback)
 ```
 
 ```javascript
-client.listen();
-  .then(sseChannel => {
-    sseChannel.watchCorpus('555daefff80f910100d741d6', function(error, data) {
-      console.log(error, data);
-    }).then(cancelWatcher => {
-      // To unwatch the corpus :
+var listener=function(error, data) {
+  console.log(error, data);
+};
 
-      //cancelWatcher();
-    });
-});
+client.watchCorpus('555daefff80f910100d741d6', listener)
 ```
 
 ```http
@@ -2669,6 +2664,10 @@ DELETE /listen/:channel_id/:resource_type/:resource_id
 
 ```python
 client.unwatchCorpus('555daefff80f910100d741d6')
+```
+
+```javascript
+client.unwatchCorpus('555daefff80f910100d741d6', listener);
 ```
 
 ```http
